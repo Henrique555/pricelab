@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PriceLab — Pare de Chutar Preço</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --black: #0a0a0a;
+  --white: #f5f2ec;
+  --lime: #c8f04a;
+  --lime-dark: #9bbf2e;
+  --gray: #1a1a1a;
+  --gray2: #2a2a2a;
+  --muted: #666;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  overflow-x: hidden;
+}
+
+/* GRAIN */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.35;
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 1px;
+  color: var(--white);
+}
+
+.nav-logo em {
+  font-style: normal;
+  color: var(--lime);
+}
+
+.nav-cta {
+  background: var(--lime);
+  color: var(--black);
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+
+.nav-cta:hover { background: #d8f860; transform: translateY(-1px); }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 60% 50% at 80% 50%, rgba(200,240,74,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(200,240,74,0.04) 0%, transparent 60%);
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(200,240,74,0.1);
+  border: 1px solid rgba(200,240,74,0.25);
+  color: var(--lime);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  width: fit-content;
+  animation: fadeUp 0.8s ease both;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--lime);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(72px, 12vw, 160px);
+  line-height: 0.9;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+
+.hero-title .highlight {
+  color: var(--lime);
+  position: relative;
+  display: inline-block;
+}
+
+.hero-title .strike {
+  position: relative;
+  color: var(--muted);
+}
+
+.hero-title .strike::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 6px;
+  background: var(--lime);
+  transform: rotate(-2deg);
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2.5vw, 22px);
+  color: #aaa;
+  max-width: 580px;
+  line-height: 1.6;
+  font-weight: 300;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+
+.hero-sub strong { color: var(--white); font-weight: 600; }
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.8s 0.3s ease both;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--lime);
+  color: var(--black);
+  padding: 18px 36px;
+  border-radius: 100px;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(200,240,74,0.25); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-arrow { font-size: 18px; transition: transform 0.2s; }
+.btn-primary:hover .btn-arrow { transform: translateX(4px); }
+
+.hero-proof {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hero-proof span { color: var(--lime); }
+
+/* PAIN SECTION */
+.pain {
+  padding: 100px 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pain-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+
+.pain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-bottom: 60px;
+}
+
+.pain-item {
+  background: var(--gray);
+  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pain-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: #333;
+}
+
+.pain-item:hover::before { background: var(--lime); }
+
+.pain-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: #222;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.pain-text {
+  font-size: 15px;
+  color: #888;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.pain-text strong { color: var(--white); font-weight: 600; }
+
+.pain-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.pain-headline .lime { color: var(--lime); }
+
+/* HOW IT WORKS */
+.how {
+  padding: 100px 40px;
+  background: var(--gray);
+  position: relative;
+  overflow: hidden;
+}
+
+.how::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(200,240,74,0.06), transparent 70%);
+  border-radius: 50%;
+}
+
+.section-wrap { max-width: 1000px; margin: 0 auto; }
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 60px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.section-title .lime { color: var(--lime); }
+
+.section-desc {
+  font-size: 15px;
+  color: #888;
+  max-width: 280px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+
+.step {
+  background: var(--black);
+  padding: 32px 24px;
+  position: relative;
+}
+
+.step-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 64px;
+  color: #1a1a1a;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.step-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+
+.step-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--white);
+}
+
+.step-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.step-connector {
+  position: absolute;
+  top: 40px; right: -12px;
+  color: var(--lime);
+  font-size: 20px;
+  z-index: 1;
+}
+
+/* WHAT YOU GET */
+.features {
+  padding: 100px 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-top: 60px;
+}
+
+.feature-card {
+  background: var(--gray);
+  padding: 36px 32px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+
+.feature-card:hover { background: #222; }
+
+.feature-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--lime), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.feature-card:hover::after { opacity: 1; }
+
+.feature-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.feature-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.feature-desc {
+  font-size: 14px;
+  color: #888;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+/* COMPARISON */
+.comparison {
+  padding: 100px 40px;
+  background: var(--gray);
+}
+
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  max-width: 800px;
+  margin: 60px auto 0;
+}
+
+.comp-col { padding: 36px 32px; }
+.comp-col.bad { background: #111; }
+.comp-col.good { background: var(--lime); color: var(--black); }
+
+.comp-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  opacity: 0.6;
+}
+
+.comp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.comp-item .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.comp-col.bad .comp-item { color: #666; }
+.comp-col.good .comp-item { color: var(--black); font-weight: 500; }
+
+/* PRICING */
+.pricing {
+  padding: 100px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(200,240,74,0.05), transparent 70%);
+  border-radius: 50%;
+}
+
+.pricing-card {
+  max-width: 480px;
+  margin: 60px auto 0;
+  background: var(--gray);
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--lime);
+}
+
+.pricing-badge {
+  display: inline-block;
+  background: rgba(200,240,74,0.1);
+  border: 1px solid rgba(200,240,74,0.2);
+  color: var(--lime);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.pricing-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 96px;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--lime);
+  margin-bottom: 4px;
+}
+
+.pricing-period {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pricing-includes {
+  text-align: left;
+  margin-bottom: 36px;
+}
+
+.pricing-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #222;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.pricing-item:last-child { border-bottom: none; }
+.pricing-item .check { color: var(--lime); font-size: 16px; flex-shrink: 0; }
+
+.btn-buy {
+  display: block;
+  width: 100%;
+  background: var(--lime);
+  color: var(--black);
+  padding: 18px;
+  border-radius: 100px;
+  font-size: 17px;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.btn-buy:hover { background: #d8f860; transform: translateY(-2px); box-shadow: 0 20px 40px rgba(200,240,74,0.25); }
+
+.pricing-guarantee {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* FAQ */
+.faq {
+  padding: 100px 40px;
+  background: var(--gray);
+  max-width: 100%;
+}
+
+.faq-list {
+  max-width: 680px;
+  margin: 60px auto 0;
+}
+
+.faq-item {
+  border-bottom: 1px solid #2a2a2a;
+  padding: 24px 0;
+  cursor: pointer;
+}
+
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  gap: 20px;
+}
+
+.faq-icon {
+  color: var(--lime);
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+
+.faq-a {
+  font-size: 14px;
+  color: #888;
+  line-height: 1.7;
+  font-weight: 300;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s;
+}
+
+.faq-item.open .faq-a {
+  max-height: 200px;
+  padding-top: 16px;
+}
+
+/* FINAL CTA */
+.final-cta {
+  padding: 120px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.final-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,240,74,0.08), transparent);
+}
+
+.final-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 8vw, 100px);
+  line-height: 0.95;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+}
+
+.final-title .lime { color: var(--lime); }
+
+.final-sub {
+  font-size: 18px;
+  color: #888;
+  margin-bottom: 48px;
+  font-weight: 300;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* FOOTER */
+footer {
+  padding: 32px 40px;
+  border-top: 1px solid #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--white);
+}
+
+.footer-logo em { font-style: normal; color: var(--lime); }
+
+.footer-text {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* TICKER */
+.ticker {
+  background: var(--lime);
+  color: var(--black);
+  padding: 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-inner {
+  display: inline-flex;
+  gap: 0;
+  animation: ticker 20s linear infinite;
+}
+
+.ticker-item {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 2px;
+  padding: 0 32px;
+}
+
+.ticker-dot {
+  color: rgba(0,0,0,0.3);
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  .hero { padding: 100px 20px 60px; }
+  .pain, .features, .pricing, .final-cta { padding: 60px 20px; }
+  .how, .comparison, .faq { padding: 60px 20px; }
+  .pain-grid, .features-grid, .comp-grid { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .step-connector { display: none; }
+  footer { padding: 24px 20px; }
+  .section-header { flex-direction: column; align-items: flex-start; }
+  .section-desc { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Price<em>Lab</em></div>
+  <a href="#pricing" class="nav-cta">Quero Acesso →</a>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item">PARE DE CHUTAR PREÇO <span class="ticker-dot">✦</span></span>
+    <span class="ticker-item">PRECIFICAÇÃO COM IA <span class="ticker-dot">✦</span></span>
+    <span class="ticker-item">PARA DESIGNERS GRÁFICOS <span class="ticker-dot">✦</span></span>
+    <span class="ticker-item">DEFENDA SEU VALOR <span class="ticker-dot">✦</span></span>
+    <span class="ticker-item">PARE DE CHUTAR PREÇO <span class="ticker-dot">✦</span></span>
+    <span class="ticker-item">PRECIFICAÇÃO COM IA <span class="ticker-dot">✦</span></span>
+    <span class="ticker-item">PARA DESIGNERS GRÁFICOS <span class="ticker-dot">✦</span></span>
+    <span class="ticker-item">DEFENDA SEU VALOR <span class="ticker-dot">✦</span></span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-eyebrow">Ferramenta com IA para designers</div>
+  <h1 class="hero-title">
+    PARE DE<br>
+    <span class="strike">CHUTAR</span><br>
+    <span class="highlight">PREÇO</span>
+  </h1>
+  <p class="hero-sub">
+    O PriceLab analisa seu projeto, o cliente e o mercado — e te entrega <strong>uma precificação completa com argumentos para defender cada centavo.</strong>
+  </p>
+  <div class="hero-actions">
+    <a href="#pricing" class="btn-primary">
+      Quero Precificar Certo
+      <span class="btn-arrow">→</span>
+    </a>
+    <span class="hero-proof">Acesso por apenas <span>R$47</span> — vitalício</span>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section class="pain">
+  <div class="pain-label">A realidade de todo designer autônomo</div>
+  <div class="pain-grid">
+    <div class="pain-item">
+      <div class="pain-num">01</div>
+      <div class="pain-text">Você passa horas num projeto, manda o preço e o cliente fala que <strong>"tá caro"</strong> — e você nem sabe se está certo ou errado.</div>
+    </div>
+    <div class="pain-item">
+      <div class="pain-num">02</div>
+      <div class="pain-text">Você cobra menos que deveria com medo de perder o cliente. <strong>No final do mês, o saldo não fecha.</strong></div>
+    </div>
+    <div class="pain-item">
+      <div class="pain-num">03</div>
+      <div class="pain-text">Você pergunta em grupos, recebe 10 respostas diferentes, e <strong>continua sem saber quanto cobrar.</strong></div>
+    </div>
+    <div class="pain-item">
+      <div class="pain-num">04</div>
+      <div class="pain-text">Você entrega um trabalho incrível mas <strong>não sabe como justificar o preço</strong> — e acaba dando desconto.</div>
+    </div>
+  </div>
+  <div class="pain-headline reveal">
+    ISSO ACABA<br>
+    <span class="lime">COM O PRICELAB.</span>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="section-wrap">
+    <div class="section-header reveal">
+      <div class="section-title">COMO<br><span class="lime">FUNCIONA</span></div>
+      <div class="section-desc">Em menos de 2 minutos você tem uma precificação completa, personalizada e defensável.</div>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <span class="step-icon">🎯</span>
+        <div class="step-title">Descreve o projeto</div>
+        <div class="step-desc">Tipo de trabalho, prazo, entregáveis. Tudo em cliques — sem texto livre.</div>
+        <span class="step-connector">→</span>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <span class="step-icon">👤</span>
+        <div class="step-title">Informa o cliente</div>
+        <div class="step-desc">Porte da empresa, setor e personalidade da marca que o cliente quer.</div>
+        <span class="step-connector">→</span>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <span class="step-icon">🖼️</span>
+        <div class="step-title">Sobe referências</div>
+        <div class="step-desc">A IA analisa as imagens e calibra o valor conforme a complexidade criativa.</div>
+        <span class="step-connector">→</span>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">04</div>
+        <span class="step-icon">✦</span>
+        <div class="step-title">Recebe a análise</div>
+        <div class="step-desc">3 faixas de preço + justificativa + como defender para o cliente.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="section-header reveal">
+    <div class="section-title">O QUE VOCÊ<br><span class="lime">RECEBE</span></div>
+    <div class="section-desc">Não é só um número. É uma análise completa para você fechar com confiança.</div>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <span class="feature-icon">💰</span>
+      <div class="feature-title">3 Faixas de Preço</div>
+      <div class="feature-desc">Básico, Recomendado e Premium — com explicação de quando usar cada faixa conforme o perfil do cliente.</div>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">🧠</span>
+      <div class="feature-title">Justificativa Detalhada</div>
+      <div class="feature-desc">A IA explica os fatores que determinaram os valores: mercado, experiência, complexidade e prazo.</div>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">🗣️</span>
+      <div class="feature-title">Como Defender o Preço</div>
+      <div class="feature-desc">Script pronto de como apresentar o valor para o cliente sem travar e sem dar desconto.</div>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">📋</span>
+      <div class="feature-title">Escopo Sugerido</div>
+      <div class="feature-desc">Lista de entregáveis recomendados para incluir no contrato e evitar o famoso "ah, mas eu achei que incluía..."</div>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">⚠️</span>
+      <div class="feature-title">Alertas do Projeto</div>
+      <div class="feature-desc">Pontos de atenção específicos para aquele tipo de projeto e cliente — o que pode dar errado e como se proteger.</div>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">🚫</span>
+      <div class="feature-title">Erro Comum</div>
+      <div class="feature-desc">O erro mais comum de precificação naquele tipo de projeto — direto ao ponto para você não repetir.</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="comparison">
+  <div class="section-wrap">
+    <div class="section-title reveal" style="text-align:center;margin-bottom:8px">ANTES <span class="lime">X</span> DEPOIS</div>
+    <div class="comp-grid">
+      <div class="comp-col bad">
+        <div class="comp-label">❌ Sem o PriceLab</div>
+        <div class="comp-item"><span class="icon">😰</span> Chuta o preço baseado no feeling</div>
+        <div class="comp-item"><span class="icon">😰</span> Pergunta em grupos e recebe respostas contraditórias</div>
+        <div class="comp-item"><span class="icon">😰</span> Trava quando o cliente questiona o preço</div>
+        <div class="comp-item"><span class="icon">😰</span> Dá desconto com medo de perder o job</div>
+        <div class="comp-item"><span class="icon">😰</span> Fecha projetos que não pagam o que merecem</div>
+      </div>
+      <div class="comp-col good">
+        <div class="comp-label">✦ Com o PriceLab</div>
+        <div class="comp-item"><span class="icon">✓</span> Precificação baseada em dados reais de mercado</div>
+        <div class="comp-item"><span class="icon">✓</span> Análise personalizada para cada projeto em 2 min</div>
+        <div class="comp-item"><span class="icon">✓</span> Script pronto para defender o preço com confiança</div>
+        <div class="comp-item"><span class="icon">✓</span> Sabe exatamente o que incluir no escopo</div>
+        <div class="comp-item"><span class="icon">✓</span> Fecha projetos que pagam o que você vale</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="section-title reveal">ACESSO<br><span class="lime">VITALÍCIO</span></div>
+  <div class="pricing-card reveal">
+    <div class="pricing-badge">✦ oferta de lançamento</div>
+    <div class="pricing-price">R$47</div>
+    <div class="pricing-period">pagamento único — acesso para sempre</div>
+    <div class="pricing-includes">
+      <div class="pricing-item"><span class="check">✦</span> Precificações ilimitadas</div>
+      <div class="pricing-item"><span class="check">✦</span> Upload de referências visuais com análise por IA</div>
+      <div class="pricing-item"><span class="check">✦</span> 3 faixas de preço personalizadas</div>
+      <div class="pricing-item"><span class="check">✦</span> Justificativa + escopo + alertas</div>
+      <div class="pricing-item"><span class="check">✦</span> Script para defender o preço ao cliente</div>
+      <div class="pricing-item"><span class="check">✦</span> Atualizações futuras inclusas</div>
+    </div>
+    <a href="SEU_LINK_KIWIFY_AQUI" class="btn-buy">QUERO PRECIFICAR CERTO AGORA</a>
+    <div class="pricing-guarantee">🔒 Pagamento seguro · Acesso imediato após confirmação</div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="section-wrap">
+    <div class="section-title reveal" style="text-align:center">PERGUNTAS<br><span class="lime">FREQUENTES</span></div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Para qual tipo de designer é o PriceLab? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Para qualquer designer gráfico freelancer ou autônomo — identidade visual, social media, embalagem, UI/UX, motion, editorial. Se você cobra por projeto, o PriceLab é para você.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Os preços gerados são confiáveis? <span class="faq-icon">+</span></div>
+        <div class="faq-a">A IA é calibrada com dados do mercado brasileiro, levando em conta sua experiência, localização, porte do cliente e complexidade do projeto. Os valores são uma referência sólida — não uma tabela genérica.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Preciso saber usar IA ou tecnologia? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Zero. O PriceLab foi feito exatamente para quem não quer complicação. Você responde perguntas simples em cliques, sobe as referências do projeto e recebe a análise pronta.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Como recebo o acesso após a compra? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Imediatamente após a confirmação do pagamento, você recebe um e-mail com seu código de acesso exclusivo. É só inserir na ferramenta e usar à vontade.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">É realmente vitalício? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Sim. Você paga R$47 uma única vez e tem acesso para sempre, incluindo todas as atualizações futuras da ferramenta.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="final-title reveal">
+    CHEGA DE<br>
+    TRABALHAR<br>
+    <span class="lime">DE GRAÇA.</span>
+  </div>
+  <p class="final-sub reveal">Você passou anos desenvolvendo sua habilidade. Está na hora de cobrar o que ela vale.</p>
+  <a href="#pricing" class="btn-primary reveal" style="display:inline-flex">
+    Quero Precificar Certo
+    <span class="btn-arrow">→</span>
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Price<em>Lab</em></div>
+  <div class="footer-text">© 2025 PriceLab — Feito para designers brasileiros</div>
+</footer>
+
+<script>
+// FAQ toggle
+function toggleFaq(el) {
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
