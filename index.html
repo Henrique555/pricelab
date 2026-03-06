@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PriceLab — Precificação para Designers</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2ec;
+  --surface: #ffffff;
+  --surface2: #ede9e1;
+  --border: #d8d2c7;
+  --accent: #1a1a1a;
+  --lime: #b8e04a;
+  --lime-dark: #8fad2e;
+  --text: #1a1a1a;
+  --muted: #8a8278;
+  --red: #c0392b;
+  --step-inactive: #c8c2b8;
+}
+
+html.dark {
+  --bg: #0e0e0e;
+  --surface: #1a1a1a;
+  --surface2: #222222;
+  --border: #333333;
+  --accent: #f0f0f0;
+  --lime: #b8e04a;
+  --lime-dark: #8fad2e;
+  --text: #f0f0f0;
+  --muted: #888888;
+  --red: #e05555;
+  --step-inactive: #555555;
+}
+
+html.dark .option-card { color: var(--text); }
+html.dark .option-card:hover { border-color: #555; }
+html.dark .option-card.selected { color: #0e0e0e; background: var(--lime); border-color: var(--lime); }
+html.dark .option-card.selected .opt-label { color: #0e0e0e; }
+html.dark .option-card.selected .opt-desc { color: rgba(0,0,0,0.55); }
+html.dark .pill.selected { background: var(--lime); border-color: var(--lime); color: #0e0e0e; }
+html.dark .btn-next { background: var(--lime); color: #0e0e0e; }
+html.dark .btn-next:hover { background: #cef060; }
+html.dark .btn-copy { background: var(--lime); color: #0e0e0e; }
+html.dark .btn-copy:hover { background: #cef060; }
+html.dark .price-card.rec { background: var(--lime); border-color: var(--lime); color: #0e0e0e; }
+html.dark .price-card.rec .price-tier { color: rgba(0,0,0,0.5); }
+html.dark .price-card.rec .price-desc { color: rgba(0,0,0,0.55); }
+html.dark .rec-badge { background: #0e0e0e; color: var(--lime); }
+html.dark .ai-pill { background: var(--lime); color: #0e0e0e; }
+html.dark .ai-pill::before { background: #0e0e0e; }
+html.dark .rblock-text { color: #bbb; }
+html.dark .extra-comment { background: var(--surface2); border-color: var(--border); color: var(--text); }
+html.dark .extra-comment::placeholder { color: #555; }
+html.dark input[type=range] { background: var(--border); }
+
+html { transition: background 0.3s, color 0.3s; }
+
+/* THEME TOGGLE */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-track {
+  width: 40px; height: 22px;
+  background: var(--border);
+  border-radius: 100px;
+  position: relative;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+html.dark .toggle-track { background: var(--lime); }
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1), background 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+html.dark .toggle-thumb {
+  transform: translateX(18px);
+  background: var(--accent);
+}
+
+.toggle-icon {
+  font-size: 14px;
+  transition: opacity 0.3s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 80px; }
+
+header {
+  padding: 40px 0 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 40px;
+}
+
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 38px; letter-spacing: -1px; line-height: 1; }
+.logo em { font-style: normal; background: var(--lime); padding: 0 4px; border-radius: 2px; }
+
+.ai-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent); color: var(--lime);
+  padding: 5px 12px; border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+}
+.ai-pill::before { content:''; width:5px; height:5px; background:var(--lime); border-radius:50%; animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.tagline { font-size: 12px; color: var(--muted); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+
+.progress-wrap { margin-bottom: 36px; }
+
+.steps-row { display: flex; align-items: center; margin-bottom: 10px; }
+
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--step-inactive); transition: all 0.3s; flex-shrink: 0;
+}
+.step-dot.active { background: var(--accent); border-color: var(--accent); color: var(--lime); }
+.step-dot.done { background: var(--lime); border-color: var(--lime-dark); color: var(--accent); }
+
+.step-line { flex: 1; height: 1.5px; background: var(--border); transition: background 0.3s; }
+.step-line.done { background: var(--lime-dark); }
+
+.steps-labels { display: flex; justify-content: space-between; }
+.step-label { font-size: 10px; color: var(--step-inactive); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; text-align: center; width: 28px; transition: color 0.3s; }
+.step-label.active { color: var(--accent); }
+.step-label.done { color: var(--lime-dark); }
+
+.step-panel { display: none; animation: stepIn 0.35s ease; }
+.step-panel.active { display: block; }
+@keyframes stepIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+
+.step-heading { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.5px; margin-bottom: 6px; line-height: 1.2; }
+.step-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+
+.option-grid { display: grid; gap: 10px; margin-bottom: 24px; }
+.option-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.option-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.option-card {
+  border: 1.5px solid var(--border); background: var(--surface);
+  padding: 14px 16px; border-radius: 8px; cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.option-card:hover { border-color: #aaa; background: var(--surface2); }
+.option-card.selected { border-color: var(--accent); background: var(--accent); color: white; }
+.option-card.selected .opt-desc { color: rgba(255,255,255,0.6); }
+
+.opt-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+.opt-label { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px; line-height: 1.3; }
+.opt-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+.pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.pill {
+  padding: 9px 16px; border: 1.5px solid var(--border); background: var(--surface);
+  border-radius: 100px; font-size: 13px; cursor: pointer; transition: all 0.15s; user-select: none; font-weight: 500;
+}
+.pill:hover { border-color: #aaa; }
+.pill.selected { border-color: var(--accent); background: var(--accent); color: white; }
+
+.slider-field { margin-bottom: 24px; }
+.slider-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.slider-label { font-size: 14px; font-weight: 500; }
+.slider-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: var(--accent); }
+.slider-val span { font-size: 14px; font-weight: 500; color: var(--muted); }
+
+input[type=range] { width: 100%; -webkit-appearance: none; height: 3px; background: var(--border); border-radius: 2px; outline: none; border: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 3px solid var(--bg); box-shadow: 0 0 0 1.5px var(--accent); }
+
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: 10px; padding: 32px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface);
+  margin-bottom: 16px; position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--surface2); }
+.upload-icon { font-size: 32px; margin-bottom: 10px; }
+.upload-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.upload-hint { font-size: 12px; color: var(--muted); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+.preview-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+.preview-item { position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1.5px solid var(--border); }
+.preview-item img { width: 100%; height: 100%; object-fit: cover; }
+.preview-remove { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; background: rgba(0,0,0,0.7); color: white; border-radius: 50%; border: none; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+
+.upload-skip { text-align: center; margin-bottom: 24px; }
+.skip-link { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; font-family: 'JetBrains Mono', monospace; }
+
+.nav-row { display: flex; gap: 10px; margin-top: 8px; }
+
+.btn-back { padding: 14px 22px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; border-radius: 8px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px; }
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-next { flex: 1; padding: 16px; background: var(--accent); color: var(--lime); border: none; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 1px; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.btn-next:hover { background: #333; transform: translateY(-1px); }
+.btn-next:active { transform: none; }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+#loadingPanel { display: none; text-align: center; padding: 80px 0; }
+#loadingPanel.active { display: block; }
+
+.loading-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 32px; letter-spacing: -0.5px; }
+.loading-logo em { font-style: normal; background: var(--lime); padding: 0 4px; border-radius: 2px; }
+
+.loading-msg { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 1px; animation: fadeMsg 0.5s ease; margin-bottom: 32px; min-height: 20px; }
+@keyframes fadeMsg { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.loading-bar-wrap { width: 200px; height: 3px; background: var(--border); border-radius: 2px; margin: 0 auto; overflow: hidden; }
+.loading-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; animation: loadfill 2.5s ease-in-out infinite; }
+@keyframes loadfill { 0%{width:0%;margin-left:0} 50%{width:70%;margin-left:0} 100%{width:0%;margin-left:100%} }
+
+#resultPanel { display: none; animation: stepIn 0.5s ease; }
+#resultPanel.active { display: block; }
+
+.result-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+.result-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 28px; }
+
+.price-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+
+.price-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 18px 14px; text-align: center; }
+.price-card.rec { border-color: var(--accent); background: var(--accent); color: white; position: relative; }
+
+.rec-badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--lime); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 3px 8px; border-radius: 100px; white-space: nowrap; }
+
+.price-tier { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+.price-card.rec .price-tier { color: rgba(255,255,255,0.5); }
+.price-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+.price-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.price-card.rec .price-desc { color: rgba(255,255,255,0.55); }
+
+.rblock { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 20px 22px; margin-bottom: 12px; }
+.rblock-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.rblock-label::before { content:''; width:8px; height:8px; border-radius:2px; background:var(--lime); flex-shrink:0; }
+.rblock.warn .rblock-label::before { background: #f0c84a; }
+.rblock.danger .rblock-label::before { background: var(--red); }
+.rblock-text { font-size: 14px; line-height: 1.7; color: var(--muted); }
+.rblock-text ul { list-style: none; }
+.rblock-text ul li { padding: 5px 0 5px 18px; position: relative; border-bottom: 1px solid var(--bg); font-size: 13px; }
+.rblock-text ul li:last-child { border-bottom: none; }
+.rblock-text ul li::before { content:'→'; position:absolute; left:0; color:var(--lime-dark); font-size:12px; }
+
+.result-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+.btn-copy { flex: 1; padding: 14px; background: var(--accent); color: var(--lime); border: none; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 1px; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.btn-copy:hover { background: #333; }
+
+.btn-reset { padding: 14px 20px; background: transparent; border: 1.5px solid var(--border); color: var(--muted); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.5px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+
+.error-box { display: none; background: #fdf0ef; border: 1.5px solid #f5c6c0; color: var(--red); padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-top: 12px; font-family: 'JetBrains Mono', monospace; }
+.error-box.show { display: block; }
+
+.section-q { font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+
+.extra-comment {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.extra-comment:focus { border-color: var(--lime-dark); }
+.extra-comment::placeholder { color: var(--muted); font-style: italic; }
+
+@media (max-width: 520px) {
+  .option-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+  .price-row { grid-template-columns: 1fr; }
+  .logo { font-size: 30px; }
+  header { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+/* FREEMIUM */
+.lock-wall {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.lock-wall .rblock {
+  filter: blur(4px);
+  user-select: none;
+  pointer-events: none;
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
+.lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(var(--bg-rgb, 245,242,236),0.3) 0%, rgba(var(--bg-rgb, 245,242,236),0.97) 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 24px;
+  text-align: center;
+}
+
+html.dark .lock-overlay {
+  background: linear-gradient(to bottom, rgba(14,14,14,0.3) 0%, rgba(14,14,14,0.97) 50%);
+}
+
+.lock-icon { font-size: 28px; margin-bottom: 10px; }
+
+.lock-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.lock-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.unlock-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.unlock-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  letter-spacing: 1px;
+  transition: border-color 0.2s;
+}
+
+.unlock-input:focus { border-color: var(--lime-dark); }
+.unlock-input::placeholder { color: var(--muted); letter-spacing: 0; font-style: italic; font-family: 'Instrument Sans', sans-serif; font-size: 12px; }
+
+.unlock-btn {
+  padding: 11px 18px;
+  background: var(--accent);
+  color: var(--lime);
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 1px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.unlock-btn:hover { opacity: 0.85; }
+
+.unlock-error {
+  font-size: 11px;
+  color: var(--red);
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  display: none;
+}
+
+.unlock-error.show { display: block; }
+
+html.dark .unlock-btn { background: var(--lime); color: #0e0e0e; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">Price<em>Lab</em></div>
+    <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+          <span class="toggle-icon" id="themeIcon">☀️</span>
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </div>
+        <div class="ai-pill">IA ATIVA</div>
+      </div>
+      <div class="tagline">para designers gráficos</div>
+    </div>
+  </header>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="steps-row">
+      <div class="step-dot active" id="dot-1">1</div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step-dot" id="dot-2">2</div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step-dot" id="dot-3">3</div>
+      <div class="step-line" id="line-3"></div>
+      <div class="step-dot" id="dot-4">4</div>
+      <div class="step-line" id="line-4"></div>
+      <div class="step-dot" id="dot-5">5</div>
+    </div>
+    <div class="steps-labels">
+      <div class="step-label active" id="lbl-1">Projeto</div>
+      <div class="step-label" id="lbl-2">Cliente</div>
+      <div class="step-label" id="lbl-3">Estilo</div>
+      <div class="step-label" id="lbl-4">Você</div>
+      <div class="step-label" id="lbl-5">Refs</div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-panel active" id="step-1">
+    <div class="step-heading">Qual é o projeto?</div>
+    <div class="step-sub">Selecione o tipo de trabalho que o cliente pediu.</div>
+    <div class="option-grid cols-2" id="projectTypeGrid">
+      <div class="option-card selected" data-value="Identidade Visual Completa"><span class="opt-icon">🎨</span><div class="opt-label">Identidade Visual</div><div class="opt-desc">Logo + cores + tipografia + aplicações</div></div>
+      <div class="option-card" data-value="Criação de Logo"><span class="opt-icon">✏️</span><div class="opt-label">Só o Logo</div><div class="opt-desc">Apenas o símbolo e/ou logotipo</div></div>
+      <div class="option-card" data-value="Social Media (gestão visual)"><span class="opt-icon">📱</span><div class="opt-label">Social Media</div><div class="opt-desc">Posts, stories, templates</div></div>
+      <div class="option-card" data-value="Design Editorial (revista, livro, catálogo)"><span class="opt-icon">📖</span><div class="opt-label">Editorial</div><div class="opt-desc">Revista, catálogo, livro</div></div>
+      <div class="option-card" data-value="Design de Embalagem"><span class="opt-icon">📦</span><div class="opt-label">Embalagem</div><div class="opt-desc">Rótulo, caixa, tag, packaging</div></div>
+      <div class="option-card" data-value="UI/UX (interfaces digitais)"><span class="opt-icon">💻</span><div class="opt-label">UI/UX</div><div class="opt-desc">App, site, sistema digital</div></div>
+      <div class="option-card" data-value="Material Impresso (cartão, folder, banner)"><span class="opt-icon">🖨️</span><div class="opt-label">Material Impresso</div><div class="opt-desc">Cartão, folder, banner, flyer</div></div>
+      <div class="option-card" data-value="Motion / Animação"><span class="opt-icon">🎬</span><div class="opt-label">Motion / Animação</div><div class="opt-desc">Vídeo, GIF, After Effects</div></div>
+    </div>
+    <div class="nav-row"><button class="btn-next" onclick="goStep(2)">PRÓXIMO →</button></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-panel" id="step-2">
+    <div class="step-heading">Quem é o cliente?</div>
+    <div class="step-sub">Isso impacta diretamente o valor que você pode cobrar.</div>
+    <div class="section-q">Tamanho da empresa</div>
+    <div class="option-grid cols-2" id="clientSizeGrid">
+      <div class="option-card selected" data-value="Pessoa física ou autônomo"><span class="opt-icon">👤</span><div class="opt-label">Pessoa Física</div><div class="opt-desc">Autônomo, profissional solo</div></div>
+      <div class="option-card" data-value="Pequeno negócio ou MEI"><span class="opt-icon">🏪</span><div class="opt-label">Pequeno Negócio</div><div class="opt-desc">MEI, loja local, startup pequena</div></div>
+      <div class="option-card" data-value="Empresa de médio porte"><span class="opt-icon">🏢</span><div class="opt-label">Média Empresa</div><div class="opt-desc">Time de 10–100 pessoas</div></div>
+      <div class="option-card" data-value="Grande empresa ou corporação"><span class="opt-icon">🏙️</span><div class="opt-label">Grande Empresa</div><div class="opt-desc">Corporação, multinacional</div></div>
+    </div>
+    <div class="section-q">Setor de atuação</div>
+    <div class="pill-group" id="sectorGroup">
+      <div class="pill selected" data-value="Alimentação / Food">🍔 Alimentação</div>
+      <div class="pill" data-value="Moda / Beleza / Estética">👗 Moda & Beleza</div>
+      <div class="pill" data-value="Saúde / Bem-estar">💊 Saúde</div>
+      <div class="pill" data-value="Tecnologia / Digital">💻 Tech</div>
+      <div class="pill" data-value="Construção / Arquitetura / Decoração">🏠 Construção</div>
+      <div class="pill" data-value="Educação / Cursos">📚 Educação</div>
+      <div class="pill" data-value="Varejo / E-commerce">🛍️ Varejo</div>
+      <div class="pill" data-value="Serviços Profissionais / B2B">💼 B2B</div>
+      <div class="pill" data-value="Entretenimento / Arte / Cultura">🎭 Entretenimento</div>
+      <div class="pill" data-value="Outro setor">Outro</div>
+    </div>
+    <div class="section-q">Algum detalhe adicional sobre o cliente?</div>
+    <textarea class="extra-comment" id="commentClient" rows="3" placeholder="Ex: cliente bem exigente, já trocou de agência antes, tem urgência mas não quer pagar por isso..."></textarea>
+    <div class="nav-row"><button class="btn-back" onclick="goStep(1)">←</button><button class="btn-next" onclick="goStep(3)">PRÓXIMO →</button></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-panel" id="step-3">
+    <div class="step-heading">Como o cliente quer ser visto?</div>
+    <div class="step-sub">Selecione tudo que se aplica. Isso ajuda a IA a entender a complexidade criativa do projeto.</div>
+    <div class="section-q">Personalidade da marca</div>
+    <div class="pill-group" id="personalityGroup">
+      <div class="pill" data-value="Sofisticado e premium">✨ Sofisticado</div>
+      <div class="pill" data-value="Moderno e tecnológico">🚀 Moderno</div>
+      <div class="pill" data-value="Divertido e jovem">🎉 Divertido</div>
+      <div class="pill" data-value="Sério e confiável">🤝 Confiável</div>
+      <div class="pill" data-value="Natural e sustentável">🌿 Natural</div>
+      <div class="pill" data-value="Tradicional e clássico">🏛️ Clássico</div>
+      <div class="pill" data-value="Minimalista e clean">⬜ Minimalista</div>
+      <div class="pill" data-value="Ousado e criativo">🔥 Ousado</div>
+    </div>
+    <div class="section-q">O cliente já tem alguma identidade visual?</div>
+    <div class="option-grid cols-3" id="existingBrandGrid">
+      <div class="option-card selected" data-value="Não tem nada ainda"><span class="opt-icon">🆕</span><div class="opt-label">Do zero</div></div>
+      <div class="option-card" data-value="Tem algo mas precisa reformular"><span class="opt-icon">🔄</span><div class="opt-label">Reformular</div></div>
+      <div class="option-card" data-value="Tem marca estabelecida, precisa de materiais"><span class="opt-icon">✅</span><div class="opt-label">Já tem marca</div></div>
+    </div>
+    <div class="section-q">Prazo que o cliente pediu</div>
+    <div class="option-grid cols-3" id="deadlineGrid">
+      <div class="option-card" data-value="Urgente (até 3 dias)"><span class="opt-icon">⚡</span><div class="opt-label">Urgente</div><div class="opt-desc">Até 3 dias</div></div>
+      <div class="option-card selected" data-value="Normal (1 a 2 semanas)"><span class="opt-icon">📅</span><div class="opt-label">Normal</div><div class="opt-desc">1 a 2 semanas</div></div>
+      <div class="option-card" data-value="Tranquilo (3 semanas ou mais)"><span class="opt-icon">🌊</span><div class="opt-label">Tranquilo</div><div class="opt-desc">3+ semanas</div></div>
+    </div>
+    <div class="section-q">Algum detalhe sobre o estilo ou direção criativa?</div>
+    <textarea class="extra-comment" id="commentStyle" rows="3" placeholder="Ex: cliente quer algo parecido com a Apple, referências minimalistas, não quer cores muito vibrantes..."></textarea>
+    <div class="nav-row"><button class="btn-back" onclick="goStep(2)">←</button><button class="btn-next" onclick="goStep(4)">PRÓXIMO →</button></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-panel" id="step-4">
+    <div class="step-heading">Sobre você</div>
+    <div class="step-sub">Sua experiência e localização calibram os valores de mercado.</div>
+    <div class="slider-field">
+      <div class="slider-top">
+        <div class="slider-label">Anos de experiência</div>
+        <div class="slider-val" id="expDisplay">3 <span>anos</span></div>
+      </div>
+      <input type="range" id="expSlider" min="0" max="20" value="3" step="1">
+    </div>
+    <div class="section-q">Onde você atua?</div>
+    <div class="option-grid cols-2" id="locationGrid">
+      <div class="option-card selected" data-value="São Paulo (SP)"><span class="opt-icon">🏙️</span><div class="opt-label">São Paulo</div></div>
+      <div class="option-card" data-value="Rio de Janeiro (RJ)"><span class="opt-icon">🌊</span><div class="opt-label">Rio de Janeiro</div></div>
+      <div class="option-card" data-value="Sul do Brasil"><span class="opt-icon">🌲</span><div class="opt-label">Sul do Brasil</div></div>
+      <div class="option-card" data-value="Nordeste"><span class="opt-icon">☀️</span><div class="opt-label">Nordeste</div></div>
+      <div class="option-card" data-value="Interior / outras regiões"><span class="opt-icon">🏘️</span><div class="opt-label">Interior / Outros</div></div>
+      <div class="option-card" data-value="Atendo clientes nacionais remotamente"><span class="opt-icon">🌐</span><div class="opt-label">Remote / Nacional</div></div>
+    </div>
+    <div class="section-q">O que vai incluir na entrega?</div>
+    <div class="pill-group" id="deliverablesGroup">
+      <div class="pill selected" data-value="Arquivos editáveis (AI, PSD)">Arquivos editáveis</div>
+      <div class="pill selected" data-value="Até 3 rodadas de revisão">3 revisões</div>
+      <div class="pill" data-value="Manual de identidade visual completo">Manual de marca</div>
+      <div class="pill" data-value="Mockups e aplicações">Mockups</div>
+      <div class="pill" data-value="Revisões ilimitadas">Revisões ilimitadas</div>
+      <div class="pill" data-value="Cessão total de direitos autorais">Cessão de direitos</div>
+      <div class="pill" data-value="Apresentação em PDF">Apresentação PDF</div>
+    </div>
+    <div class="nav-row"><button class="btn-back" onclick="goStep(3)">←</button><button class="btn-next" onclick="goStep(5)">PRÓXIMO →</button></div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-panel" id="step-5">
+    <div class="step-heading">Tem referências visuais?</div>
+    <div class="step-sub">Suba imagens que o cliente enviou ou que inspiram o projeto. A IA vai analisar o estilo e nível de sofisticação para calibrar o valor.</div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*" multiple>
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-title">Arraste imagens aqui</div>
+      <div class="upload-hint">PNG, JPG, WEBP — até 4 imagens</div>
+    </div>
+    <div class="preview-grid" id="previewGrid"></div>
+    <div class="upload-skip"><span class="skip-link" onclick="generatePricing()">Pular — calcular sem referências</span></div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(4)">←</button>
+      <button class="btn-next" onclick="generatePricing()">✦ CALCULAR PRECIFICAÇÃO</button>
+    </div>
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingPanel">
+    <div class="loading-logo">Price<em>Lab</em></div>
+    <div class="loading-msg" id="loadingMsg">ANALISANDO PROJETO...</div>
+    <div class="loading-bar-wrap"><div class="loading-bar-fill"></div></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="resultPanel">
+    <div class="result-eyebrow">SUA PRECIFICAÇÃO</div>
+    <div class="result-title" id="resultTitle">—</div>
+    <div class="price-row" id="priceRow"></div>
+    <div id="resultBlocks"></div>
+
+    <!-- LOCK WALL (freemium) -->
+    <div class="lock-wall" id="lockWall" style="display:none">
+      <div id="lockedContent"></div>
+      <div class="lock-overlay">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Desbloqueie a análise completa</div>
+        <div class="lock-sub">Insira seu código de acesso para ver a justificativa, escopo, como apresentar o preço e os alertas do projeto.</div>
+        <div class="unlock-row">
+          <input class="unlock-input" id="unlockInput" type="text" placeholder="Seu código de acesso..." maxlength="32">
+          <button class="unlock-btn" onclick="tryUnlock()">ENTRAR</button>
+        </div>
+        <div class="unlock-error" id="unlockError">Código inválido. Tente novamente.</div>
+      </div>
+    </div>
+
+    <div class="result-actions" id="resultActions" style="display:none">
+      <button class="btn-copy" onclick="copyResult()">COPIAR RESULTADO</button>
+      <button class="btn-reset" onclick="resetAll()">NOVO PROJETO</button>
+    </div>
+
+    <!-- FREE actions (sem acesso completo) -->
+    <div class="result-actions" id="freeActions">
+      <button class="btn-reset" onclick="resetAll()">NOVO PROJETO</button>
+    </div>
+  </div>
+
+</div>
+<script>
+const state = { currentStep: 1, images: [] };
+
+function goStep(n) {
+  document.getElementById(`step-${state.currentStep}`)?.classList.remove('active');
+  state.currentStep = n;
+  document.getElementById(`step-${n}`)?.classList.add('active');
+  updateProgress(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(current) {
+  for (let i = 1; i <= 5; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    const lbl = document.getElementById(`lbl-${i}`);
+    dot.className = 'step-dot' + (i < current ? ' done' : i === current ? ' active' : '');
+    lbl.className = 'step-label' + (i < current ? ' done' : i === current ? ' active' : '');
+    if (i < 5) document.getElementById(`line-${i}`).className = 'step-line' + (i < current ? ' done' : '');
+  }
+}
+
+['projectTypeGrid','clientSizeGrid','existingBrandGrid','deadlineGrid','locationGrid'].forEach(id => {
+  document.getElementById(id)?.querySelectorAll('.option-card').forEach(card => {
+    card.addEventListener('click', () => {
+      card.closest('.option-grid').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+  });
+});
+
+['sectorGroup','personalityGroup','deliverablesGroup'].forEach(id => {
+  document.getElementById(id)?.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => pill.classList.toggle('selected'));
+  });
+});
+
+const expSlider = document.getElementById('expSlider');
+const expDisplay = document.getElementById('expDisplay');
+expSlider.addEventListener('input', () => {
+  const v = expSlider.value;
+  expDisplay.innerHTML = `${v == 20 ? '20+' : v} <span>anos</span>`;
+});
+
+const fileInput = document.getElementById('fileInput');
+const uploadZone = document.getElementById('uploadZone');
+const previewGrid = document.getElementById('previewGrid');
+
+fileInput.addEventListener('change', handleFiles);
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('dragover');
+  handleFiles({ target: { files: e.dataTransfer.files } });
+});
+
+function handleFiles(e) {
+  const files = [...e.target.files].slice(0, 4 - state.images.length);
+  files.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      state.images.push({ base64: ev.target.result.split(',')[1], mediaType: file.type, preview: ev.target.result });
+      renderPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreviews() {
+  previewGrid.innerHTML = state.images.map((img, i) => `
+    <div class="preview-item">
+      <img src="${img.preview}">
+      <button class="preview-remove" onclick="removeImage(${i})">✕</button>
+    </div>`).join('');
+}
+
+function removeImage(i) { state.images.splice(i, 1); renderPreviews(); }
+
+function getSelectedCard(id) {
+  return document.getElementById(id)?.querySelector('.option-card.selected')?.dataset.value || '';
+}
+function getMultiSelected(id) {
+  return [...(document.getElementById(id)?.querySelectorAll('.selected') || [])].map(el => el.dataset.value).join(', ');
+}
+function formatBRL(v) {
+  return new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL', minimumFractionDigits:0 }).format(v);
+}
+
+const loadingMsgs = ['ANALISANDO BRIEFING...','CONSULTANDO MERCADO...','CALCULANDO FAIXAS DE VALOR...','PREPARANDO ARGUMENTOS...','QUASE LÁ...'];
+let msgInterval;
+
+function startLoadingMsgs() {
+  let i = 0;
+  const el = document.getElementById('loadingMsg');
+  el.textContent = loadingMsgs[0];
+  msgInterval = setInterval(() => { i = (i+1) % loadingMsgs.length; el.textContent = loadingMsgs[i]; }, 1800);
+}
+function stopLoadingMsgs() { clearInterval(msgInterval); }
+
+async function generatePricing() {
+  const projectType = getSelectedCard('projectTypeGrid');
+  const clientSize = getSelectedCard('clientSizeGrid');
+  const sector = getMultiSelected('sectorGroup');
+  const personality = getMultiSelected('personalityGroup');
+  const existingBrand = getSelectedCard('existingBrandGrid');
+  const deadline = getSelectedCard('deadlineGrid');
+  const experience = document.getElementById('expSlider').value;
+  const location = getSelectedCard('locationGrid');
+  const deliverables = getMultiSelected('deliverablesGroup');
+  const commentClient = document.getElementById('commentClient').value.trim();
+  const commentStyle = document.getElementById('commentStyle').value.trim();
+  const hasImages = state.images.length > 0;
+
+  for (let i = 1; i <= 5; i++) document.getElementById(`step-${i}`)?.classList.remove('active');
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('loadingPanel').classList.add('active');
+  startLoadingMsgs();
+
+  const prompt = `Você é especialista em precificação para designers gráficos brasileiros. Analise e gere precificação realista.
+
+PROJETO:
+- Tipo: ${projectType}
+- Cliente: ${clientSize} do setor ${sector}
+- Personalidade desejada: ${personality}
+- Situação atual da marca: ${existingBrand}
+- Prazo: ${deadline}
+- Entregáveis: ${deliverables}
+- Designer: ${experience} anos de experiência, baseado em ${location}
+${commentClient ? `- Observação sobre o cliente: ${commentClient}` : ''}
+${commentStyle ? `- Observação sobre o estilo: ${commentStyle}` : ''}
+${hasImages ? `- Foram enviadas ${state.images.length} imagem(ns) de referência — analise estilo, complexidade e sofisticação para calibrar o valor.` : '- Sem referências visuais.'}
+
+Responda SOMENTE com JSON válido (sem markdown):
+{
+  "resumo": "Frase curta do projeto (até 10 palavras)",
+  "precos": {
+    "economico": {"valor": 0, "label": "Básico", "descricao": "quando usar"},
+    "recomendado": {"valor": 0, "label": "Ideal", "descricao": "quando usar"},
+    "premium": {"valor": 0, "label": "Premium", "descricao": "quando usar"}
+  },
+  "justificativa": "Fatores que determinaram esses valores (3-4 frases)",
+  "escopo_sugerido": ["item 1", "item 2", "item 3", "item 4", "item 5"],
+  "como_apresentar": "Como defender o preço para o cliente (2-3 frases)",
+  "alertas": ["alerta 1", "alerta 2", "alerta 3"],
+  "erro_comum": "Erro mais comum de precificação nesse tipo de projeto"
+}`;
+
+  const messageContent = hasImages
+    ? [...state.images.map(img => ({ type:'image', source:{ type:'base64', media_type:img.mediaType, data:img.base64 }})), { type:'text', text:prompt }]
+    : prompt;
+
+  try {
+    const resp = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{ role:'user', content:messageContent }] })
+    });
+    const data = await resp.json();
+    const raw = data.content.map(b => b.text || '').join('');
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    stopLoadingMsgs();
+    document.getElementById('loadingPanel').classList.remove('active');
+    renderResult(parsed);
+  } catch(err) {
+    stopLoadingMsgs();
+    document.getElementById('loadingPanel').classList.remove('active');
+    document.getElementById('step-5').classList.add('active');
+    document.getElementById('progressWrap').style.display = 'block';
+    updateProgress(5);
+    const eb = document.getElementById('errorBox');
+    eb.textContent = 'Erro ao conectar com a IA. Tente novamente.';
+    eb.classList.add('show');
+  }
+}
+
+function renderResult(d) {
+  document.getElementById('resultTitle').textContent = d.resumo;
+  const p = d.precos;
+
+  const priceHTML = `
+    <div class="price-card">
+      <div class="price-tier">${p.economico.label}</div>
+      <div class="price-val">${formatBRL(p.economico.valor)}</div>
+      <div class="price-desc">${p.economico.descricao}</div>
+    </div>
+    <div class="price-card rec">
+      <div class="rec-badge">RECOMENDADO</div>
+      <div class="price-tier">${p.recomendado.label}</div>
+      <div class="price-val">${formatBRL(p.recomendado.valor)}</div>
+      <div class="price-desc">${p.recomendado.descricao}</div>
+    </div>
+    <div class="price-card">
+      <div class="price-tier">${p.premium.label}</div>
+      <div class="price-val">${formatBRL(p.premium.valor)}</div>
+      <div class="price-desc">${p.premium.descricao}</div>
+    </div>`;
+
+  const escopo = (d.escopo_sugerido||[]).map(i=>`<li>${i}</li>`).join('');
+  const alertas = (d.alertas||[]).map(i=>`<li>${i}</li>`).join('');
+
+  const fullBlocksHTML = `
+    <div class="rblock"><div class="rblock-label">Por que esses valores</div><div class="rblock-text">${d.justificativa}</div></div>
+    <div class="rblock"><div class="rblock-label">Escopo sugerido</div><div class="rblock-text"><ul>${escopo}</ul></div></div>
+    <div class="rblock warn"><div class="rblock-label">Como apresentar ao cliente</div><div class="rblock-text">${d.como_apresentar}</div></div>
+    <div class="rblock warn"><div class="rblock-label">Pontos de atenção</div><div class="rblock-text"><ul>${alertas}</ul></div></div>
+    <div class="rblock danger"><div class="rblock-label">Erro comum — não faça isso</div><div class="rblock-text">${d.erro_comum}</div></div>`;
+
+  // Tudo junto para o lock (preços + blocos)
+  const fullContentHTML = `<div class="price-row">${priceHTML}</div>${fullBlocksHTML}`;
+
+  window._lastResult = d;
+  window._fullBlocksHTML = fullBlocksHTML;
+  window._priceHTML = priceHTML;
+
+  const isUnlocked = localStorage.getItem('pl_access') === ACCESS_CODE;
+
+  if (isUnlocked) {
+    document.getElementById('priceRow').innerHTML = priceHTML;
+    document.getElementById('resultBlocks').innerHTML = fullBlocksHTML;
+    document.getElementById('lockWall').style.display = 'none';
+    document.getElementById('resultActions').style.display = 'flex';
+    document.getElementById('freeActions').style.display = 'none';
+  } else {
+    // Tudo bloqueado — preços + análise
+    document.getElementById('priceRow').innerHTML = '';
+    document.getElementById('resultBlocks').innerHTML = '';
+    document.getElementById('lockedContent').innerHTML = fullContentHTML;
+    document.getElementById('lockWall').style.display = 'block';
+    document.getElementById('resultActions').style.display = 'none';
+    document.getElementById('freeActions').style.display = 'flex';
+  }
+
+  document.getElementById('resultPanel').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── FREEMIUM ────────────────────────────────────────────
+// Defina aqui os códigos de acesso válidos
+const ACCESS_CODE = 'PRICELAB2025';
+
+function tryUnlock() {
+  const input = document.getElementById('unlockInput').value.trim().toUpperCase();
+  const errEl = document.getElementById('unlockError');
+
+  if (input === ACCESS_CODE) {
+    localStorage.setItem('pl_access', ACCESS_CODE);
+    errEl.classList.remove('show');
+    // Revela tudo
+    document.getElementById('priceRow').innerHTML = window._priceHTML || '';
+    document.getElementById('resultBlocks').innerHTML = window._fullBlocksHTML || '';
+    document.getElementById('lockWall').style.display = 'none';
+    document.getElementById('resultActions').style.display = 'flex';
+    document.getElementById('freeActions').style.display = 'none';
+  } else {
+    errEl.classList.add('show');
+    document.getElementById('unlockInput').style.borderColor = 'var(--red)';
+    setTimeout(() => {
+      document.getElementById('unlockInput').style.borderColor = '';
+    }, 1200);
+  }
+}
+
+function copyResult() {
+  if (!window._lastResult) return;
+  const d = window._lastResult; const p = d.precos;
+  const txt = `PRECIFICAÇÃO — ${d.resumo}\n\nFAIXAS DE VALOR:\n• ${p.economico.label}: ${formatBRL(p.economico.valor)}\n• ${p.recomendado.label}: ${formatBRL(p.recomendado.valor)} ← Recomendado\n• ${p.premium.label}: ${formatBRL(p.premium.valor)}\n\nPOR QUE ESSES VALORES:\n${d.justificativa}\n\nCOMO APRESENTAR AO CLIENTE:\n${d.como_apresentar}\n\nERRO A EVITAR:\n${d.erro_comum}\n\n— Gerado pelo PriceLab`;
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'COPIADO ✓';
+    setTimeout(() => btn.textContent = 'COPIAR RESULTADO', 2500);
+  });
+}
+
+function resetAll() {
+  document.getElementById('resultPanel').classList.remove('active');
+  document.getElementById('progressWrap').style.display = 'block';
+  state.images = []; renderPreviews();
+  goStep(1);
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.classList.toggle('dark');
+  document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('plTheme', isDark ? 'dark' : 'light');
+}
+
+// Restore saved theme
+(function() {
+  const saved = localStorage.getItem('plTheme');
+  if (saved === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const icon = document.getElementById('themeIcon');
+      if (icon) icon.textContent = '🌙';
+    });
+  }
+})();
+</script>
+</body>
+</html>
