@@ -9,10 +9,19 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Parse body manually if needed
     let body = req.body;
     if (typeof body === 'string') {
       body = JSON.parse(body);
+    }
+
+    // Se body vier vazio ou undefined, lê o raw
+    if (!body || Object.keys(body).length === 0) {
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const raw = Buffer.concat(chunks).toString();
+      body = JSON.parse(raw);
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -29,6 +38,6 @@ module.exports = async function handler(req, res) {
     return res.status(response.status).json(data);
 
   } catch (err) {
-    return res.status(500).json({ error: 'Erro ao conectar com a IA', detail: err.message });
+    return res.status(500).json({ error: 'Erro interno', detail: err.message });
   }
 }
