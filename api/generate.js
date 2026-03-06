@@ -13,15 +13,12 @@ module.exports = async function handler(req, res) {
     if (typeof body === 'string') {
       body = JSON.parse(body);
     }
-
-    // Se body vier vazio ou undefined, lê o raw
     if (!body || Object.keys(body).length === 0) {
       const chunks = [];
       for await (const chunk of req) {
         chunks.push(chunk);
       }
-      const raw = Buffer.concat(chunks).toString();
-      body = JSON.parse(raw);
+      body = JSON.parse(Buffer.concat(chunks).toString());
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -35,7 +32,13 @@ module.exports = async function handler(req, res) {
     });
 
     const data = await response.json();
-    return res.status(response.status).json(data);
+
+    // Retorna o erro exato da Anthropic se não for 200
+    if (!response.ok) {
+      return res.status(response.status).json({ anthropic_error: data, body_received: body });
+    }
+
+    return res.status(200).json(data);
 
   } catch (err) {
     return res.status(500).json({ error: 'Erro interno', detail: err.message });
